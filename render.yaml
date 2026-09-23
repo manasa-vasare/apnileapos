@@ -1,0 +1,31 @@
+services:
+  # ─── Backend: Node.js API ────────────────────────────────────────
+  - type: web
+    name: apnileap-backend
+    runtime: node
+    rootDir: apnileap-final-main/backend
+    buildCommand: npm install && npx prisma generate
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        sync: false      # you will fill this in on Render dashboard
+      - key: JIRA_DOMAIN
+        sync: false
+      - key: JIRA_EMAIL
+        sync: false
+      - key: JIRA_API_TOKEN
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+
+  # ─── Frontend: React/Vite Static Site ────────────────────────────
+  - type: static
+    name: apnileap-frontend
+    rootDir: apnileap-final-main/frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false      # set this to your backend URL after deploying it

@@ -579,6 +579,22 @@ app.get("/spokes/:boardId/members", async (req, res) => {
   };
   res.json(result);
 });
+app.get("/confluence/pages", async (req, res) => {
+  try {
+    const authHeader = Buffer.from(`${process.env.JIRA_EMAIL}:${process.env.JIRA_API_TOKEN}`).toString("base64");
+    const response = await axios.get(`${process.env.JIRA_DOMAIN}/wiki/api/v2/pages`, {
+      headers: {
+        'Authorization': `Basic ${authHeader}`,
+        'Accept': 'application/json'
+      }
+    });
+    res.json(response.data.results);
+  } catch (error) {
+    console.error("Confluence API Error:", error.message);
+    res.status(500).json({ error: "Failed to fetch Confluence pages" });
+  }
+});
+
 app.get("/tasks", async (req, res) => {
   const boardId = req.query.boardId || "3";
   const spoke = SPOKES[boardId];

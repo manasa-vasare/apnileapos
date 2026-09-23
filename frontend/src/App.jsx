@@ -5,10 +5,17 @@ import {
   Draggable,
 } from "@hello-pangea/dnd";
 import axios from "axios";
+import { ConfluenceView } from "./components/ConfluenceView";
 
 // Global Axios Interceptor to inject JWT authentication token automatically on outgoing requests
 axios.interceptors.request.use(
   (config) => {
+    // Dynamically rewrite localhost URLs to production API URL if hosted on Render
+    const apiBaseUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
+    if (config.url && config.url.startsWith("http://localhost:5001")) {
+      config.url = config.url.replace("http://localhost:5001", apiBaseUrl);
+    }
+
     const token = localStorage.getItem("apnileap-token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -890,6 +897,9 @@ function App() {
   const [activeCustomBoardId, setActiveCustomBoardIdState] = useState(null);
   const activeCustomBoardIdRef = useRef(null);
   const setActiveCustomBoardId = (val) => { activeCustomBoardIdRef.current = val; setActiveCustomBoardIdState(val); };
+  
+  const [activeCustomBoardTitle, setActiveCustomBoardTitle] = useState("");
+
 
   // Modal States & Premium Multi-tab details
   const [selectedTask, setSelectedTask] = useState(null);
@@ -5676,6 +5686,13 @@ function App() {
                       collapsed={false}
                       onClick={() => setActiveView("student-approvals")}
                     />
+                    <SidebarNavItem
+                      active={activeView === "confluence"}
+                      icon={<FaBook size={16} />}
+                      label="Wiki & Docs"
+                      collapsed={false}
+                      onClick={() => setActiveView("confluence")}
+                    />
                   </>
                 ) : (
                   <>
@@ -5696,6 +5713,13 @@ function App() {
                         onClick={() => setActiveView("kanban")}
                       />
                     )}
+                    <SidebarNavItem
+                      active={activeView === "confluence"}
+                      icon={<FaBook size={16} />}
+                      label="Wiki & Docs"
+                      collapsed={false}
+                      onClick={() => setActiveView("confluence")}
+                    />
                   </>
                 )}
                 
@@ -6326,7 +6350,11 @@ function App() {
                 <select
                   className="form-select"
                   value={filterProject}
-                  onChange={(e) => setFilterProject(e.target.value)}
+                  onChange={(e) => {
+                    setFilterProject(e.target.value);
+                    setActiveCustomBoardTitle("");
+                    setActiveCustomBoardId(null);
+                  }}
                   style={{ padding: "6px 28px 6px 12px", width: "180px", height: "34px", fontSize: "13px" }}
                 >
                   <option value="All">All Projects</option>
@@ -6344,6 +6372,8 @@ function App() {
                     setFilterPriority("All");
                     setFilterAssignee("All");
                     setFilterProject("All");
+                    setActiveCustomBoardId(null);
+                    setActiveCustomBoardTitle("");
                     triggerToast("Filters cleared");
                   }}
                   style={{
@@ -6496,6 +6526,7 @@ function App() {
             handleRunAiVerificationSweep={handleRunAiVerificationSweep}
             activeSubView={activeView === "teams" ? "teams" : activeView === "student-approvals" ? "student-approvals" : "overview"}
             setActiveCustomBoardId={setActiveCustomBoardId}
+            setActiveCustomBoardTitle={setActiveCustomBoardTitle}
             fetchJiraTasks={fetchJiraTasks}
             setFilterProject={setFilterProject}
           />
@@ -7333,6 +7364,7 @@ function App() {
                                           <button
                                               onClick={() => {
                                                   setActiveCustomBoardId(targetBoardId);
+                                                  setActiveCustomBoardTitle(linkedProj ? linkedProj.title : team.name);
                                                   fetchJiraTasks(false, targetBoardId);
                                                   setFilterProject("All");
                                                   setActiveView("kanban");
@@ -8114,10 +8146,12 @@ function App() {
                                           const alloc = proj.allocations ? proj.allocations.find(a => a.targetCampusId === currentBoardId) : null;
                                           if (alloc && alloc.customBoardId) {
                                             setActiveCustomBoardId(alloc.customBoardId);
+                                            setActiveCustomBoardTitle(proj.title);
                                             fetchJiraTasks(false, alloc.customBoardId);
                                             setFilterProject("All");
                                           } else {
                                             setActiveCustomBoardId(null);
+                                            setActiveCustomBoardTitle("");
                                             setFilterProject(`[${proj.company}] ${proj.title}`);
                                           }
                                           setActiveView("kanban");
@@ -8597,10 +8631,60 @@ function App() {
               </div>
             )}
 
+            {/* CONFLUENCE WIKI VIEW */}
+            {activeView === "confluence" && (
+              <div className="fade-in" style={{ flex: 1, display: "flex", flexDirection: "column", background: "var(--bg-main)" }}>
+                <ConfluenceView 
+                  activeWorkspace={activeWorkspace}
+                  activeCustomBoardId={activeCustomBoardId}
+                  activeCustomBoardTitle={activeCustomBoardTitle}
+                  setFilterProject={setFilterProject}
+                />
+              </div>
+            )}
+
             {/* 2. DRAGGABLE KANBAN BOARD VIEW */}
             {activeView === "kanban" && (
               <div className="fade-in" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
                 
+                {/* Back Button */}
+                <div style={{ marginBottom: "16px" }}>
+                  <button
+                    onClick={() => setActiveView("dashboard")}
+                    style={{
+                      background: "transparent",
+                      border: "1px solid var(--border-subtle)",
+                      padding: "8px 16px",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      color: "var(--text-main)",
+                      transition: "all 0.2s"
+                    }}
+                    onMouseOver={(e) => { e.currentTarget.style.background = "var(--bg-card)"; e.currentTarget.style.borderColor = "var(--primary)"; }}
+                    onMouseOut={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "var(--border-subtle)"; }}
+                  >
+                    ← Go Back
+                  </button>
+                </div>
+
+                {/* Project Title Header */}
+                <div style={{ marginBottom: '20px' }}>
+                  <h2 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
+                    {activeCustomBoardTitle 
+                      ? `${activeCustomBoardTitle} - Kanban Board` 
+                      : (filterProject === "All" 
+                          ? "All Projects - Kanban Board" 
+                          : `${filterProject.replace(/^\[.*?\]\s*/, '')} - Kanban Board`
+                        )
+                    }
+                  </h2>
+                </div>
+
                 {/* DragDrop Board Container */}
                 <DragDropContext onDragEnd={onDragEnd}>
                   <div style={{ display: "flex", gap: "20px", flex: 1, minHeight: "600px", alignItems: "stretch", overflowX: "auto" }}>
@@ -15985,6 +16069,7 @@ function FacultyMentorDashboardView({
   handleRunAiVerificationSweep,
   activeSubView = "overview",
   setActiveCustomBoardId,
+  setActiveCustomBoardTitle,
   fetchJiraTasks,
   setFilterProject
 }) {
@@ -16028,16 +16113,16 @@ function FacultyMentorDashboardView({
     const alloc = proj.allocations ? proj.allocations.find(a => String(a.targetCampusId) === String(spokeId)) : null;
     if (alloc && alloc.customBoardId) {
       if (setActiveCustomBoardId) setActiveCustomBoardId(alloc.customBoardId);
+      if (typeof setActiveCustomBoardTitle === "function") setActiveCustomBoardTitle(proj.title);
       if (fetchJiraTasks) fetchJiraTasks(false, alloc.customBoardId);
       if (setFilterProject) setFilterProject("All");
     } else {
       if (setActiveCustomBoardId) setActiveCustomBoardId(null);
+      if (typeof setActiveCustomBoardTitle === "function") setActiveCustomBoardTitle("");
       if (setFilterProject) setFilterProject(`[${proj.company}] ${proj.title}`);
     }
-    if (setActiveView) {
-      setActiveView("kanban");
-      window.scrollTo(0, 0);
-    }
+    if (setActiveView) setActiveView("kanban");
+    window.scrollTo(0, 0);
   };
 
   const fetchMentorData = async () => {
