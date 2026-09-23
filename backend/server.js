@@ -6337,7 +6337,7 @@ app.get("/api/run-seed", async (req, res) => {
   const allUsers = [
     // Admin & Moderator
     { email: "admin@apnileap.com", password: "admin123", displayName: "Executive Admin", role: "Executive Administrator", persona: "executive", spokeId: null },
-    { email: "moderator@apnileap.com", password: "moderator123", displayName: "Hub Moderator", role: "Central Admin", persona: "moderator", spokeId: null },
+    { email: "moderator@apnileap.com", password: "moderator123", displayName: "Hub Moderator", role: "Central Moderator", persona: "moderator", spokeId: null },
     // Coordinators
     { email: "kle@apnileap.com", password: "spoke123", displayName: "KLE Coordinator", role: "Spoke Coordinator", persona: "admin", spokeId: "3" },
     { email: "coep@apnileap.com", password: "spoke123", displayName: "COEP Coordinator", role: "Spoke Coordinator", persona: "admin", spokeId: "101" },
