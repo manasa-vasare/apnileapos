@@ -4872,9 +4872,13 @@ app.post("/api/login", async (req, res) => {
 `
         };
         
-        const info = await transporter.sendMail(mailOptions);
-        if (isTestAccount) console.log(`[2FA OTP PREVIEW URL]: ${nodemailer.getTestMessageUrl(info)}`);
-        else console.log(`[2FA OTP SENT] Dispatched to ${recipient} (Override)`);
+        // Fire-and-forget: don't await so login responds instantly
+        transporter.sendMail(mailOptions).then(info => {
+            if (isTestAccount) console.log(`[2FA OTP PREVIEW URL]: ${nodemailer.getTestMessageUrl(info)}`);
+            else console.log(`[2FA OTP SENT] Dispatched to ${toAddresses}`);
+        }).catch(err => {
+            console.error(`[2FA OTP ERROR] Failed to send email:`, err.message);
+        });
         
         return res.json({ success: true, require2FA: true, message: "OTP sent to email." });
     }
