@@ -6329,69 +6329,65 @@ app.post("/cache/clear", (req, res) => {
 
 // ⚠️ TEMPORARY SEED ENDPOINT — Remove after seeding is done
 app.get("/api/run-seed", async (req, res) => {
-  const bcrypt = require("bcryptjs");
   const results = [];
-  try {
+  const allUsers = [
     // Admin
-    await prisma.user.upsert({
-      where: { email: "admin@apnileap.com" },
-      update: { persona: "admin" },
-      create: { email: "admin@apnileap.com", password: "admin123", displayName: "Central Admin", role: "MODERATOR", persona: "admin" }
-    });
-    results.push("✅ Admin created");
-
+    { email: "admin@apnileap.com", password: "admin123", displayName: "Central Admin", role: "MODERATOR", persona: "admin", spokeId: null },
     // Coordinators
-    const coordinators = [
-      { email: "kle@apnileap.com", name: "KLE Coordinator", role: "COORDINATOR", spokeId: "3" },
-      { email: "coep@apnileap.com", name: "COEP Coordinator", role: "COORDINATOR", spokeId: "101" },
-      { email: "mmcoep@apnileap.com", name: "MMCOEP Coordinator", role: "COORDINATOR", spokeId: "102" },
-      { email: "rit@apnileap.com", name: "RIT Coordinator", role: "COORDINATOR", spokeId: "103" },
-    ];
-    for (const c of coordinators) {
-      await prisma.user.upsert({
-        where: { email: c.email },
-        update: {},
-        create: { email: c.email, password: "spoke123", displayName: c.name, role: c.role, spokeId: c.spokeId, persona: "admin" }
-      });
-      results.push(`✅ Coordinator: ${c.email}`);
-    }
+    { email: "kle@apnileap.com", password: "spoke123", displayName: "KLE Coordinator", role: "COORDINATOR", persona: "admin", spokeId: "3" },
+    { email: "coep@apnileap.com", password: "spoke123", displayName: "COEP Coordinator", role: "COORDINATOR", persona: "admin", spokeId: "101" },
+    { email: "mmcoep@apnileap.com", password: "spoke123", displayName: "MMCOEP Coordinator", role: "COORDINATOR", persona: "admin", spokeId: "102" },
+    { email: "rit@apnileap.com", password: "spoke123", displayName: "RIT Coordinator", role: "COORDINATOR", persona: "admin", spokeId: "103" },
+    // KLE Faculty Mentors
+    { email: "mentor@kle.edu", password: "mentor123", displayName: "Prof. Pooja P Shettar", role: "MENTOR", persona: "faculty-mentor", spokeId: "3" },
+    { email: "mentor2@kle.edu", password: "mentor123", displayName: "Prof. Amit Kachavimath", role: "MENTOR", persona: "faculty-mentor", spokeId: "3" },
+    { email: "mentor3@kle.edu", password: "mentor123", displayName: "Prof. Sneha Varur", role: "MENTOR", persona: "faculty-mentor", spokeId: "3" },
+    // COEP Faculty Mentors
+    { email: "mentor@coep.edu", password: "mentor123", displayName: "Dr. Meena Deshmukh", role: "MENTOR", persona: "faculty-mentor", spokeId: "101" },
+    { email: "mentor2@coep.edu", password: "mentor123", displayName: "Dr. Vinayak Shinde", role: "MENTOR", persona: "faculty-mentor", spokeId: "101" },
+    { email: "mentor3@coep.edu", password: "mentor123", displayName: "Dr. Shalini Patil", role: "MENTOR", persona: "faculty-mentor", spokeId: "101" },
+    // MMCOEP Faculty Mentors
+    { email: "mentor@mmcoep.edu", password: "mentor123", displayName: "Dr. Kavita Joshi", role: "MENTOR", persona: "faculty-mentor", spokeId: "102" },
+    { email: "mentor2@mmcoep.edu", password: "mentor123", displayName: "Prof. Anil Sawant", role: "MENTOR", persona: "faculty-mentor", spokeId: "102" },
+    // RIT Faculty Mentors
+    { email: "mentor@rit.edu", password: "mentor123", displayName: "Dr. Suresh Desai", role: "MENTOR", persona: "faculty-mentor", spokeId: "103" },
+    { email: "mentor2@rit.edu", password: "mentor123", displayName: "Dr. Mahesh Patel", role: "MENTOR", persona: "faculty-mentor", spokeId: "103" },
+    // KLE Students
+    { email: "manasa@kle.edu", password: "student123", displayName: "Manasa Vasare", role: "STUDENT", persona: "spoke-kle", spokeId: "3" },
+    { email: "divya@kle.edu", password: "student123", displayName: "Divya Kumari", role: "STUDENT", persona: "spoke-kle", spokeId: "3" },
+    { email: "vineet@kle.edu", password: "student123", displayName: "Vineet Kulkarni", role: "STUDENT", persona: "spoke-kle", spokeId: "3" },
+    { email: "renuka@kle.edu", password: "student123", displayName: "Renuka Kagadal", role: "STUDENT", persona: "spoke-kle", spokeId: "3" },
+    { email: "vageesh@kle.edu", password: "student123", displayName: "Vageesh Mathad", role: "STUDENT", persona: "spoke-kle", spokeId: "3" },
+    { email: "mehak@kle.edu", password: "student123", displayName: "Mehak Sayed", role: "STUDENT", persona: "spoke-kle", spokeId: "3" },
+    { email: "parth@kle.edu", password: "student123", displayName: "Parth Karpe", role: "STUDENT", persona: "spoke-kle", spokeId: "3" },
+    { email: "nupur@kle.edu", password: "student123", displayName: "Nupur", role: "STUDENT", persona: "spoke-kle", spokeId: "3" },
+    // COEP Students
+    { email: "sneha@coep.edu", password: "student123", displayName: "Sneha Joshi", role: "STUDENT", persona: "spoke-coep", spokeId: "101" },
+    { email: "amit@coep.edu", password: "student123", displayName: "Amit Waghmare", role: "STUDENT", persona: "spoke-coep", spokeId: "101" },
+    { email: "ananya@coep.edu", password: "student123", displayName: "Ananya Deshpande", role: "STUDENT", persona: "spoke-coep", spokeId: "101" },
+    { email: "rohan@coep.edu", password: "student123", displayName: "Rohan Kulkarni", role: "STUDENT", persona: "spoke-coep", spokeId: "101" },
+    // MMCOEP Students
+    { email: "nikhil@mmcoep.edu", password: "student123", displayName: "Nikhil Rane", role: "STUDENT", persona: "spoke-mmcoep", spokeId: "102" },
+    { email: "sayali@mmcoep.edu", password: "student123", displayName: "Sayali Deshmukh", role: "STUDENT", persona: "spoke-mmcoep", spokeId: "102" },
+    { email: "tanmay@mmcoep.edu", password: "student123", displayName: "Tanmay Joshi", role: "STUDENT", persona: "spoke-mmcoep", spokeId: "102" },
+    { email: "pooja@mmcoep.edu", password: "student123", displayName: "Pooja Mehta", role: "STUDENT", persona: "spoke-mmcoep", spokeId: "102" },
+    // RIT Students
+    { email: "tejas@rit.edu", password: "student123", displayName: "Tejas Shinde", role: "STUDENT", persona: "spoke-rit", spokeId: "103" },
+    { email: "priti@rit.edu", password: "student123", displayName: "Priti Patil", role: "STUDENT", persona: "spoke-rit", spokeId: "103" },
+    { email: "aditya@rit.edu", password: "student123", displayName: "Aditya Shinde", role: "STUDENT", persona: "spoke-rit", spokeId: "103" },
+    { email: "snehal@rit.edu", password: "student123", displayName: "Snehal Pawar", role: "STUDENT", persona: "spoke-rit", spokeId: "103" },
+  ];
 
-    // Faculty Mentors
-    const mentors = [
-      { email: "anitasharma@kle.in", name: "Dr. Anita Sharma", spokeId: "3" },
-      { email: "rajivgupta@kle.in", name: "Prof. Rajiv Gupta", spokeId: "3" },
-      { email: "meenadeshmukh@coep.in", name: "Dr. Meena Deshmukh", spokeId: "101" },
-      { email: "kavitajoshi@mmcoep.in", name: "Dr. Kavita Joshi", spokeId: "102" },
-      { email: "sureshdesai@rit.in", name: "Dr. Suresh Desai", spokeId: "103" },
-    ];
-    for (const m of mentors) {
+  try {
+    for (const u of allUsers) {
       await prisma.user.upsert({
-        where: { email: m.email },
-        update: {},
-        create: { email: m.email, password: "faculty123", displayName: m.name, role: "MENTOR", spokeId: m.spokeId, persona: "admin" }
+        where: { email: u.email },
+        update: { password: u.password, displayName: u.displayName, role: u.role, persona: u.persona, status: "ACTIVE" },
+        create: { email: u.email, password: u.password, displayName: u.displayName, role: u.role, persona: u.persona, spokeId: u.spokeId, status: "ACTIVE" }
       });
-      results.push(`✅ Mentor: ${m.email}`);
+      results.push(`✅ ${u.role}: ${u.email}`);
     }
-
-    // Students
-    const students = [
-      { email: "manasa@kle.edu", name: "Manasa Vasare", spokeId: "3" },
-      { email: "divya@kle.edu", name: "Divya Kumari", spokeId: "3" },
-      { email: "renuka@kle.edu", name: "Renuka Kagadal", spokeId: "3" },
-      { email: "snehajoshi@coep.edu", name: "Sneha Joshi", spokeId: "101" },
-      { email: "nikhilrane@mmcoep.edu", name: "Nikhil Rane", spokeId: "102" },
-      { email: "tejasshinde@rit.edu", name: "Tejas Shinde", spokeId: "103" },
-    ];
-    for (const s of students) {
-      await prisma.user.upsert({
-        where: { email: s.email },
-        update: {},
-        create: { email: s.email, password: "student123", displayName: s.name, role: "STUDENT", spokeId: s.spokeId, persona: "student" }
-      });
-      results.push(`✅ Student: ${s.email}`);
-    }
-
-    res.json({ success: true, message: "Seeding complete!", results });
+    res.json({ success: true, message: `Seeding complete! ${results.length} users seeded.`, results });
   } catch (err) {
     console.error("Seed error:", err);
     res.status(500).json({ success: false, error: err.message, results });
