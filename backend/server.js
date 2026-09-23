@@ -6327,5 +6327,76 @@ app.post("/cache/clear", (req, res) => {
   });
 });
 
+// ⚠️ TEMPORARY SEED ENDPOINT — Remove after seeding is done
+app.get("/api/run-seed", async (req, res) => {
+  const bcrypt = require("bcryptjs");
+  const results = [];
+  try {
+    // Admin
+    await prisma.user.upsert({
+      where: { email: "admin@apnileap.com" },
+      update: { persona: "admin" },
+      create: { email: "admin@apnileap.com", password: "admin123", displayName: "Central Admin", role: "MODERATOR", persona: "admin" }
+    });
+    results.push("✅ Admin created");
+
+    // Coordinators
+    const coordinators = [
+      { email: "kle@apnileap.com", name: "KLE Coordinator", role: "COORDINATOR", spokeId: "3" },
+      { email: "coep@apnileap.com", name: "COEP Coordinator", role: "COORDINATOR", spokeId: "101" },
+      { email: "mmcoep@apnileap.com", name: "MMCOEP Coordinator", role: "COORDINATOR", spokeId: "102" },
+      { email: "rit@apnileap.com", name: "RIT Coordinator", role: "COORDINATOR", spokeId: "103" },
+    ];
+    for (const c of coordinators) {
+      await prisma.user.upsert({
+        where: { email: c.email },
+        update: {},
+        create: { email: c.email, password: "spoke123", displayName: c.name, role: c.role, spokeId: c.spokeId, persona: "admin" }
+      });
+      results.push(`✅ Coordinator: ${c.email}`);
+    }
+
+    // Faculty Mentors
+    const mentors = [
+      { email: "anitasharma@kle.in", name: "Dr. Anita Sharma", spokeId: "3" },
+      { email: "rajivgupta@kle.in", name: "Prof. Rajiv Gupta", spokeId: "3" },
+      { email: "meenadeshmukh@coep.in", name: "Dr. Meena Deshmukh", spokeId: "101" },
+      { email: "kavitajoshi@mmcoep.in", name: "Dr. Kavita Joshi", spokeId: "102" },
+      { email: "sureshdesai@rit.in", name: "Dr. Suresh Desai", spokeId: "103" },
+    ];
+    for (const m of mentors) {
+      await prisma.user.upsert({
+        where: { email: m.email },
+        update: {},
+        create: { email: m.email, password: "faculty123", displayName: m.name, role: "MENTOR", spokeId: m.spokeId, persona: "admin" }
+      });
+      results.push(`✅ Mentor: ${m.email}`);
+    }
+
+    // Students
+    const students = [
+      { email: "manasa@kle.edu", name: "Manasa Vasare", spokeId: "3" },
+      { email: "divya@kle.edu", name: "Divya Kumari", spokeId: "3" },
+      { email: "renuka@kle.edu", name: "Renuka Kagadal", spokeId: "3" },
+      { email: "snehajoshi@coep.edu", name: "Sneha Joshi", spokeId: "101" },
+      { email: "nikhilrane@mmcoep.edu", name: "Nikhil Rane", spokeId: "102" },
+      { email: "tejasshinde@rit.edu", name: "Tejas Shinde", spokeId: "103" },
+    ];
+    for (const s of students) {
+      await prisma.user.upsert({
+        where: { email: s.email },
+        update: {},
+        create: { email: s.email, password: "student123", displayName: s.name, role: "STUDENT", spokeId: s.spokeId, persona: "student" }
+      });
+      results.push(`✅ Student: ${s.email}`);
+    }
+
+    res.json({ success: true, message: "Seeding complete!", results });
+  } catch (err) {
+    console.error("Seed error:", err);
+    res.status(500).json({ success: false, error: err.message, results });
+  }
+});
+
 // Server startup listening has been moved inside the mongoose.connect().then() block above to guarantee correct database connection sync.
 // trigger nodemon reload for gmail config
