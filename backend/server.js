@@ -6380,6 +6380,10 @@ app.get("/api/run-seed", async (req, res) => {
     { email: "priti@rit.edu", password: "student123", displayName: "Priti Patil", role: "STUDENT", persona: "spoke-rit", spokeId: "103" },
     { email: "aditya@rit.edu", password: "student123", displayName: "Aditya Shinde", role: "STUDENT", persona: "spoke-rit", spokeId: "103" },
     { email: "snehal@rit.edu", password: "student123", displayName: "Snehal Pawar", role: "STUDENT", persona: "spoke-rit", spokeId: "103" },
+    // Corporate Partners & Project Managers
+    { email: "sponsor@nvidia.com", password: "nvidia123", displayName: "Company 1 Sponsor", role: "SPONSOR", persona: "sponsor-nvidia", spokeId: null },
+    { email: "pm@apnileap.com", password: "pm123", displayName: "Project Manager", role: "MODERATOR", persona: "project-manager", spokeId: null },
+    { email: "project_mentor@nvidia.com", password: "nvidia123", displayName: "Company 1 Mentor", role: "MENTOR", persona: "project-mentor", spokeId: null },
   ];
 
   try {
