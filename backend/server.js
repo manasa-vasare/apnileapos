@@ -6404,5 +6404,27 @@ app.get("/api/run-seed", async (req, res) => {
   }
 });
 
+// ==========================================
+// DEMO RESET ENDPOINT
+// ==========================================
+app.get("/api/run-reset", async (req, res) => {
+  try {
+    await prisma.corporateProject.deleteMany({});
+    await prisma.mockTask.deleteMany({});
+    await prisma.submission.deleteMany({});
+    await prisma.team.deleteMany({});
+    await prisma.meeting.deleteMany({});
+    await prisma.chatMessage.deleteMany({});
+    
+    res.json({ 
+      success: true, 
+      message: "Demo reset successful! All projects, tasks, submissions, teams, and meetings have been cleared." 
+    });
+  } catch (err) {
+    console.error("Reset error:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Server startup listening has been moved inside the mongoose.connect().then() block above to guarantee correct database connection sync.
 // trigger nodemon reload for gmail config
