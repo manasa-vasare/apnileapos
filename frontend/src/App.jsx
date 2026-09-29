@@ -198,8 +198,15 @@ const getDeadlineInfo = (dueDate, statusName) => {
 // Utility company/sponsor evaluator to load high-fidelity brand logo icons for tasks
 const getSponsorCompany = (task) => {
   if (!task) return null;
-  const summary = (task.fields?.summary || "").toLowerCase();
-  const description = (task.fields?.description || "").toLowerCase();
+  let summary = "";
+  if (typeof task.fields?.summary === "string") summary = task.fields.summary.toLowerCase();
+  
+  let description = "";
+  if (typeof task.fields?.description === "string") {
+      description = task.fields.description.toLowerCase();
+  } else if (task.fields?.description && typeof task.fields.description === "object") {
+      description = JSON.stringify(task.fields.description).toLowerCase();
+  }
   
   if (summary.includes("company 1") || description.includes("company 1") || summary.includes("nvidia")) return { name: "Company 1", logo: "https://ui-avatars.com/api/?name=C1&background=76b900&color=fff" };
   if (summary.includes("intel") || description.includes("intel")) return { name: "Intel", logo: "https://logo.clearbit.com/intel.com?size=32" };
