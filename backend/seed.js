@@ -53,9 +53,6 @@ async function main() {
 
   // 2.5 Seed Faculty Mentors
   const mentors = [
-    { email: 'anitasharma@kle.in', name: 'Dr. Anita Sharma', role: 'MENTOR', spokeId: '3' },
-    { email: 'rajivgupta@kle.in', name: 'Prof. Rajiv Gupta', role: 'MENTOR', spokeId: '3' },
-    { email: 'vikramrao@kle.in', name: 'Dr. Vikram Rao', role: 'MENTOR', spokeId: '3' },
     { email: 'meenadeshmukh@coep.in', name: 'Dr. Meena Deshmukh', role: 'MENTOR', spokeId: '101' },
     { email: 'sanjaypatil@coep.in', name: 'Prof. Sanjay Patil', role: 'MENTOR', spokeId: '101' },
     { email: 'snehabhosale@coep.in', name: 'Prof. Sneha Bhosale', role: 'MENTOR', spokeId: '101' },
