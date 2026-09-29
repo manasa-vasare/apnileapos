@@ -2161,7 +2161,7 @@ app.get("/hub/metrics", async (req, res) => {
           };
           allCampusIssues[boardId] = issues;
         } catch (err) {
-          console.warn(`Failed to fetch live board ${spoke.boardId} for spoke ${spoke.name} during Hub metrics aggregation:`, err.message);
+          // console.warn(`Failed to fetch live board...`);
           handleJiraNetworkError(err);
           if (apiCache.tasks[boardId]) {
             allCampusIssues[boardId] = apiCache.tasks[boardId].data;
@@ -2410,7 +2410,7 @@ app.get("/moderator/projects", async (req, res) => {
           };
           allCampusIssues[boardId] = issues;
         } catch (err) {
-          console.warn(`Failed to fetch live board ${spoke.boardId} for spoke ${spoke.name} during Moderator Projects aggregation:`, err.message);
+          // console.warn(`Failed to fetch live board...`);
           handleJiraNetworkError(err);
           if (apiCache.tasks[boardId]) {
             allCampusIssues[boardId] = apiCache.tasks[boardId].data;
@@ -3360,7 +3360,7 @@ app.post("/meetings/:id/remind", async (req, res) => {
         }
         tasks = issues;
       } catch (err) {
-        console.warn(`Failed to fetch live board ${spoke.boardId} during remind aggregation, falling back to cached or mock tasks.`);
+        // console.warn(`Failed to fetch live board...`);
         handleJiraNetworkError(err);
         tasks = apiCache.tasks[meeting.campusId]?.data || mockTasksStore[meeting.campusId] || [];
       }
