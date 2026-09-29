@@ -616,9 +616,11 @@ app.get("/tasks", async (req, res) => {
     }
     try {
       const targetJiraBoardId = isDynamicLiveBoard ? boardId : spoke.boardId;
+      console.log(`[TASKS API] targetJiraBoardId: ${targetJiraBoardId}, isDynamicLiveBoard: ${isDynamicLiveBoard}`);
       
       let issues = [];
       if (isNaN(targetJiraBoardId)) {
+        console.log(`[TASKS API] Fetching via JQL for project ${targetJiraBoardId}...`);
         // Fetch via JQL for dynamic custom project boards (where targetJiraBoardId is the Project Key)
         const response = await axios.post(`${process.env.JIRA_DOMAIN}/rest/api/3/search/jql`, {
             jql: `project = ${targetJiraBoardId} ORDER BY created ASC`,
@@ -628,6 +630,7 @@ app.get("/tasks", async (req, res) => {
             timeout: 30000
         });
         issues = response.data.issues || [];
+        console.log(`[TASKS API] Fetched ${issues.length} issues via JQL.`);
         
         // Inject a mock parent Epic structure to satisfy frontend Kanban UI filters smoothly!
         issues = issues.map(issue => {
