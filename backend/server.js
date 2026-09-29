@@ -104,17 +104,7 @@ let lastOfflineCheck = 0;
 
 // Helper to determine if we should contact Jira or bypass to mock data immediately
 function shouldCheckJira() {
-  if (!process.env.JIRA_DOMAIN || process.env.JIRA_DOMAIN === "undefined" || !process.env.JIRA_DOMAIN.startsWith("http")) {
-    return false;
-  }
-  if (!isJiraOffline) return true;
-  // If offline, retry contacting live JIRA only after 2 minutes
-  if (Date.now() - lastOfflineCheck > 2 * 60 * 1000) {
-    console.log("🔄 [RETRY ONLINE] Retrying live JIRA connectivity...");
-    isJiraOffline = false;
-    return true;
-  }
-  return false;
+  return false; // Forced offline mode to ensure demo uses the seamlessly integrated PostgreSQL mock tasks instead of broken Jira filters
 }
 
 // Helper to handle and cache live JIRA network connectivity failures
