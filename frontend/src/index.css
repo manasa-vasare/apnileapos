@@ -131,12 +131,10 @@
   --primary-glow: rgba(99, 102, 241, 0.12);
 }
 
-/* Global Transition to Smooth out Theme Changes */
-body, div, nav, aside, main, header, section, span, h1, h2, h3, h4, h5, h6, p, button, input, select, textarea, form {
-  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-              border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-              color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-              box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+/* Global Transition Removed for Performance */
+/* Theme changes will snap instantly for inner elements, eliminating the 1000+ DOM node recalculation lag */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 html {
