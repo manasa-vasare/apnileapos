@@ -4621,7 +4621,7 @@ async function seedDefaultChatMessages() {
         message: "Yes Nikhil! Accuracy is at 94% on Jetson Nano. Testing in the lab now.",
         campus: "RIT Spoke"
       }];
-      await prisma.chatMessage.insertMany(defaultMessages);
+      await prisma.chatMessage.createMany({ data: defaultMessages });
       console.log(`🌱 [SEEDING SUCCESS] Seeded ${defaultMessages.length} default chat messages!`);
     }
   } catch (err) {
@@ -4710,8 +4710,9 @@ async function seedDefaultTasks() {
       });
     });
     if (tasksToInsert.length > 0) {
-      await prisma.mockTask.insertMany(tasksToInsert, {
-        ordered: false
+      await prisma.mockTask.createMany({
+        data: tasksToInsert,
+        skipDuplicates: true
       });
     }
     console.log(`🌱 [SEEDING SUCCESS] Seeded ${tasksToInsert.length} mock tasks into PostgreSQL!`);
@@ -4749,7 +4750,7 @@ async function seedDefaultMeetings() {
         agenda: "Ingested Automotive MCU architecture review, budget allocation check, and student delegation status.",
         cadenceType: "Monthly FIP Steering Review"
       }];
-      await prisma.meeting.insertMany(defaultMeetings);
+      await prisma.meeting.createMany({ data: defaultMeetings });
       console.log(`🌱 [SEEDING SUCCESS] Seeded ${defaultMeetings.length} default meetings into PostgreSQL!`);
     } else {
       console.log(`ℹ️ [DATABASE] Meeting collection already populated with ${meetingCount} records. Seeding bypassed.`);
