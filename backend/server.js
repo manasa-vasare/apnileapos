@@ -5091,7 +5091,8 @@ app.post("/api/users/:id/approve", async (req, res) => {
           });
       }
       
-      const inviteLink = "https://apnileap.atlassian.net/invite/secret-link-12345";
+      // Direct them to the Jira login/dashboard page since a static invite link isn't enabled
+      const inviteLink = "https://apnileapp.atlassian.net";
       const subject = "Welcome to ApniLeap! Activate your Jira Account";
       const htmlBody = `
         <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc;">
