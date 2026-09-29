@@ -5068,6 +5068,58 @@ app.post("/api/users/:id/approve", async (req, res) => {
       where: { id },
       data: { status: "ACTIVE" }
     });
+    
+    // Attempt to send Welcome Email with Jira Invite Link
+    try {
+      const nodemailer = require("nodemailer");
+      const hasSmtpConfig = process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS;
+      let transporter, isTestAccount = false;
+      
+      if (hasSmtpConfig) {
+          transporter = nodemailer.createTransport({
+              host: process.env.SMTP_HOST,
+              port: parseInt(process.env.SMTP_PORT || "587"),
+              secure: process.env.SMTP_SECURE === "true",
+              auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+          });
+      } else {
+          isTestAccount = true;
+          const testAccount = await nodemailer.createTestAccount();
+          transporter = nodemailer.createTransport({
+              host: "smtp.ethereal.email", port: 587, secure: false,
+              auth: { user: testAccount.user, pass: testAccount.pass }
+          });
+      }
+      
+      const inviteLink = "https://apnileap.atlassian.net/invite/secret-link-12345";
+      const subject = "Welcome to ApniLeap! Activate your Jira Account";
+      const htmlBody = `
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc;">
+          <h2 style="color: #0f172a;">Welcome to ApniLeap, ${user.displayName}!</h2>
+          <p style="color: #334155;">Your college faculty has officially verified and approved your ApniLeap account.</p>
+          <p style="color: #334155;">Please click the button below to activate your secure Atlassian Jira workspace.</p>
+          <div style="margin: 30px 0;">
+            <a href="${inviteLink}" style="background-color: #0052CC; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Activate Jira Account</a>
+          </div>
+          <p style="color: #94a3b8; font-size: 11px;">Sent automatically by ApniLeap Autonomous Governance Engine</p>
+        </div>
+      `;
+
+      transporter.sendMail({
+          from: process.env.SMTP_FROM || '"ApniLeap Admin" <noreply@apnileap.com>',
+          to: user.email,
+          subject: subject,
+          html: htmlBody
+      }).then(info => {
+          if (isTestAccount) console.log(`[JIRA INVITE EMAIL URL]: ${nodemailer.getTestMessageUrl(info)}`);
+          else console.log(`[JIRA INVITE SENT] Dispatched to ${user.email}`);
+      }).catch(err => {
+          console.error(`[JIRA INVITE ERROR] Failed to send email:`, err.message);
+      });
+    } catch (emailErr) {
+      console.warn("Failed to trigger welcome email block:", emailErr.message);
+    }
+
     invalidateCache(user.spokeId);
     invalidateCache();
     console.log(`[USER APPROVED] User ${user.email} (${user.role}) approved on spoke ${user.spokeId}`);
