@@ -7699,25 +7699,7 @@ function App() {
                                     Review and approve tasks submitted by students
                                   </span>
                                 </div>
-                                <button
-                                  onClick={handleRunAiVerificationSweep}
-                                  style={{
-                                    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                                    color: "#fff",
-                                    border: "none",
-                                    padding: "8px 16px",
-                                    borderRadius: "8px",
-                                    fontSize: "12px",
-                                    fontWeight: "750",
-                                    cursor: "pointer",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "6px",
-                                    boxShadow: "0 4px 12px rgba(99, 102, 241, 0.3)"
-                                  }}
-                                >
-                                  <span>🤖 Run AI Verification Sweep</span>
-                                </button>
+                                
                               </div>
 
                               {spokeSubmissions.length > 0 ? (
@@ -18856,28 +18838,6 @@ function FacultyMentorDashboardView({
                             <span>Team: {assignedTeam.name}</span>
                           </span>
                         )}
-                        {pendingDeliverables.length > 0 && typeof handleRunAiVerificationSweep === "function" && (
-                          <button
-                            type="button"
-                            onClick={handleRunAiVerificationSweep}
-                            style={{
-                              background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                              color: "#fff",
-                              border: "none",
-                              padding: "5px 12px",
-                              borderRadius: "7px",
-                              fontSize: "11px",
-                              fontWeight: "750",
-                              cursor: "pointer",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "5px",
-                              boxShadow: "0 2px 6px rgba(99, 102, 241, 0.25)"
-                            }}
-                          >
-                            <span>🤖 Run AI Verification Sweep</span>
-                          </button>
-                        )}
                       </div>
                     </div>
 
@@ -19332,3 +19292,5 @@ function FacultyMentorDashboardView({
 }
 
 export default App;
+
+
