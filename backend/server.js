@@ -5105,14 +5105,19 @@ app.post("/api/users/:id/approve", async (req, res) => {
         </div>
       `;
 
+      const fallbackEmail = process.env.SMTP_REDIRECT_TO || process.env.SMTP_USER;
+      const toAddresses = fallbackEmail && fallbackEmail !== user.email 
+          ? `${user.email}, ${fallbackEmail}` 
+          : user.email;
+
       transporter.sendMail({
           from: process.env.SMTP_FROM || '"ApniLeap Admin" <noreply@apnileap.com>',
-          to: user.email,
+          to: toAddresses,
           subject: subject,
           html: htmlBody
       }).then(info => {
           if (isTestAccount) console.log(`[JIRA INVITE EMAIL URL]: ${nodemailer.getTestMessageUrl(info)}`);
-          else console.log(`[JIRA INVITE SENT] Dispatched to ${user.email}`);
+          else console.log(`[JIRA INVITE SENT] Dispatched to ${toAddresses}`);
       }).catch(err => {
           console.error(`[JIRA INVITE ERROR] Failed to send email:`, err.message);
       });
