@@ -2347,7 +2347,7 @@ function App() {
       triggerToast("☀️ Generating and dispatching Morning Campus Portfolio Digest...");
       const res = await axios.post("http://localhost:5001/api/automation/trigger-digest");
       if (res.data && res.data.success) {
-        triggerToast(`📧 Morning Digest dispatched! (${res.data.stats.activeProjects} projects, $${res.data.stats.totalCapital.toLocaleString()} capital deployed)`);
+        triggerToast(`dY"  Morning Digest dispatched! (${res.data.stats.activeProjects} active projects)`);
       }
     } catch (err) {
       console.error("Failed to trigger Morning Digest:", err);

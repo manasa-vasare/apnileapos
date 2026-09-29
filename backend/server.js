@@ -5869,7 +5869,7 @@ async function runMorningCampusDigest() {
     const approvedSubmissions = allSubmissions.filter(s => s.status === "Approved").length;
     const pendingSubmissions = allSubmissions.filter(s => s.status === "Awaiting Review").length;
     const subject = "☀️ ApniLeap Morning Campus Portfolio Digest";
-    const textBody = `Good morning from ApniLeap Rovo Agent!\n\nHere is your automated daily portfolio summary across all institute campuses:\n- Total Active Projects: ${allProjects.length}\n- Capital Deployed: $${totalCapital.toLocaleString()}\n- Approved Deliverables: ${approvedSubmissions}\n- Pending Faculty Reviews: ${pendingSubmissions}\n\nAll campus partitions (KLE, COEP, MMCOEP, RIT) are synchronized with the central Atlassian Jira backbone. Have a productive day!`;
+    const textBody = `Good morning from ApniLeap Rovo Agent!\n\nHere is your automated daily portfolio summary across all institute campuses:\n- Total Active Projects: ${allProjects.length}\n- Approved Deliverables: ${approvedSubmissions}\n- Pending Faculty Reviews: ${pendingSubmissions}\n\nAll campus partitions (KLE, COEP, MMCOEP, RIT) are synchronized with the central Atlassian Jira backbone. Have a productive day!`;
     const htmlBody = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc;">
         <h2 style="color: #4f46e5; margin-top: 0;">☀️ ApniLeap Morning Campus Portfolio Digest</h2>
@@ -5878,10 +5878,6 @@ async function runMorningCampusDigest() {
           <div style="background: #ffffff; padding: 15px; border-radius: 8px; border-left: 4px solid #4f46e5; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
             <span style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Active Projects</span>
             <div style="font-size: 24px; font-weight: bold; color: #1e293b; margin-top: 5px;">${allProjects.length}</div>
-          </div>
-          <div style="background: #ffffff; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-            <span style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Capital Deployed</span>
-            <div style="font-size: 24px; font-weight: bold; color: #1e293b; margin-top: 5px;">$${totalCapital.toLocaleString()}</div>
           </div>
           <div style="background: #ffffff; padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
             <span style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Approved Deliverables</span>
@@ -5923,7 +5919,7 @@ async function runMorningCampusDigest() {
 
     // 2. Dispatch WhatsApp / SMS notification via Twilio
     if (typeof sendFanOutEmail === "function") {
-      await sendFanOutEmail(subject, `Total Projects: ${allProjects.length} | Capital Deployed: $${totalCapital.toLocaleString()} | Approved Tasks: ${approvedSubmissions} | Pending Reviews: ${pendingSubmissions}`);
+      await sendFanOutEmail(subject, `Total Projects: ${allProjects.length} | Approved Tasks: ${approvedSubmissions} | Pending Reviews: ${pendingSubmissions}`);
     }
     return {
       success: true,
