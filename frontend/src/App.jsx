@@ -13716,26 +13716,33 @@ function CorporateSponsorDashboardView({ projects, loading, onRefresh, onSubmitP
                               <span>•</span>
                               <span>Duration: <strong>{proj.duration}</strong></span>
                             </div>
-                            <p style={{ margin: "8px 0 0 0", fontSize: "12px", color: "var(--text-muted)", lineHeight: "1.4", maxWidth: "340px" }}>
-                              {proj.description}
-                            </p>
-                            {proj.requirements && (
-                              <div style={{ marginTop: "8px", fontSize: "11.5px", color: "var(--text-muted)" }}>
-                                <strong>Requirements:</strong> <em>{proj.requirements}</em>
-                              </div>
-                            )}
-                            {proj.phases && proj.phases.length > 0 && (
-                              <div style={{ marginTop: "8px" }}>
-                                <span style={{ fontSize: "10.5px", fontWeight: "750", color: "var(--text-dim)", display: "block", textTransform: "uppercase" }}>Project Phases:</span>
-                                <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "4px" }}>
-                                  {proj.phases.map((ph, idx) => (
-                                    <div key={idx} style={{ fontSize: "11px", color: "var(--text-muted)" }}>
-                                      <strong>{ph.name}</strong> {ph.description && `- ${ph.description}`}
+                            <details style={{ marginTop: "10px" }}>
+                              <summary style={{ fontSize: "12px", fontWeight: "700", color: "var(--primary)", cursor: "pointer", userSelect: "none", display: "inline-block", padding: "4px 8px", background: "rgba(37, 99, 235, 0.1)", borderRadius: "4px" }}>
+                                View Details
+                              </summary>
+                              <div style={{ marginTop: "10px", padding: "10px", background: "rgba(255,255,255,0.02)", borderLeft: "2px solid var(--primary)", borderRadius: "0 6px 6px 0" }}>
+                                <p style={{ margin: "0", fontSize: "12px", color: "var(--text-muted)", lineHeight: "1.4", maxWidth: "340px" }}>
+                                  {proj.description}
+                                </p>
+                                {proj.requirements && (
+                                  <div style={{ marginTop: "10px", fontSize: "11.5px", color: "var(--text-muted)" }}>
+                                    <strong>Requirements:</strong> <em>{proj.requirements}</em>
+                                  </div>
+                                )}
+                                {proj.phases && proj.phases.length > 0 && (
+                                  <div style={{ marginTop: "10px" }}>
+                                    <span style={{ fontSize: "10.5px", fontWeight: "750", color: "var(--text-dim)", display: "block", textTransform: "uppercase" }}>Project Phases:</span>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "4px" }}>
+                                      {proj.phases.map((ph, idx) => (
+                                        <div key={idx} style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                                          <strong>{ph.name}</strong> {ph.description && `- ${ph.description}`}
+                                        </div>
+                                      ))}
                                     </div>
-                                  ))}
-                                </div>
+                                  </div>
+                                )}
                               </div>
-                            )}
+                            </details>
                           </div>
                         </div>
                       </td>
