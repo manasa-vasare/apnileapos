@@ -104,7 +104,17 @@ let lastOfflineCheck = 0;
 
 // Helper to determine if we should contact Jira or bypass to mock data immediately
 function shouldCheckJira() {
-  return false; // Forced offline mode to ensure demo uses the seamlessly integrated PostgreSQL mock tasks instead of broken Jira filters
+  if (!process.env.JIRA_DOMAIN || process.env.JIRA_DOMAIN === "undefined" || !process.env.JIRA_DOMAIN.startsWith("http")) {
+    return false;
+  }
+  if (!isJiraOffline) return true;
+  // If offline, retry contacting live JIRA only after 2 minutes
+  if (Date.now() - lastOfflineCheck > 2 * 60 * 1000) {
+    console.log("🔄 [RETRY ONLINE] Retrying live JIRA connectivity...");
+    isJiraOffline = false;
+    return true;
+  }
+  return false;
 }
 
 // Helper to handle and cache live JIRA network connectivity failures
@@ -606,14 +616,36 @@ app.get("/tasks", async (req, res) => {
     }
     try {
       const targetJiraBoardId = isDynamicLiveBoard ? boardId : spoke.boardId;
-      const response = await axios.get(`${process.env.JIRA_DOMAIN}/rest/agile/1.0/board/${targetJiraBoardId}/issue`, {
-        headers: {
-          Authorization: `Basic ${auth}`,
-          Accept: "application/json"
-        },
-        timeout: 30000
-      });
-      let issues = response.data.issues || [];
+      
+      let issues = [];
+      if (isNaN(targetJiraBoardId)) {
+        // Fetch via JQL for dynamic custom project boards (where targetJiraBoardId is the Project Key)
+        const response = await axios.post(`${process.env.JIRA_DOMAIN}/rest/api/3/search/jql`, {
+            jql: `project = ${targetJiraBoardId} ORDER BY created ASC`,
+            maxResults: 100
+        }, {
+            headers: { Authorization: `Basic ${auth}`, Accept: "application/json", "Content-Type": "application/json" },
+            timeout: 30000
+        });
+        issues = response.data.issues || [];
+        
+        // Inject a mock parent Epic structure to satisfy frontend Kanban UI filters smoothly!
+        issues = issues.map(issue => {
+            if (!issue.fields.parent) {
+                issue.fields.parent = { key: targetJiraBoardId, fields: { summary: "Project Root" } };
+            }
+            return issue;
+        });
+      } else {
+        const response = await axios.get(`${process.env.JIRA_DOMAIN}/rest/agile/1.0/board/${targetJiraBoardId}/issue`, {
+          headers: {
+            Authorization: `Basic ${auth}`,
+            Accept: "application/json"
+          },
+          timeout: 30000
+        });
+        issues = response.data.issues || [];
+      }
       issues = issues.map(issue => {
          if (issue.fields && issue.fields.status && (issue.fields.status.name === "Backlog" || issue.fields.status.name === "Selected for Development")) {
              issue.fields.status.name = "To Do";
@@ -2848,18 +2880,11 @@ app.post("/spoke/project/:projectId/accept", async (req, res) => {
             // wait a few seconds for Jira to generate the board
             await new Promise(r => setTimeout(r, 2000));
             
-            const boardRes = await axios.get(`${process.env.JIRA_DOMAIN}/rest/agile/1.0/board?projectKeyOrId=${realKey}`, {
-               headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/json" }
-            });
+            // 3. Skip Agile Board lookup to avoid Jira index delays - use Project Key directly!
+            let newBoardId = realKey; 
             
-            if (boardRes.data && boardRes.data.values && boardRes.data.values.length > 0) {
-                newBoardId = boardRes.data.values[0].id;
-                console.log(`[ASYNC PROVISIONING] Discovered Board ID: ${newBoardId}`);
-                
-                // Add to LIVE_BOARD_IDS in memory so the new board functions properly
-                if (!LIVE_BOARD_IDS.includes(newBoardId.toString())) {
-                    LIVE_BOARD_IDS.push(newBoardId.toString());
-                }
+            if (!LIVE_BOARD_IDS.includes(newBoardId.toString())) {
+                LIVE_BOARD_IDS.push(newBoardId.toString());
             }
 
             // 4. Create standard tasks inside the new project
@@ -2884,7 +2909,7 @@ app.post("/spoke/project/:projectId/accept", async (req, res) => {
               });
             }
 
-            // 5. Update DB with real Jira project key and new board ID
+            // 5. Update DB with real Jira project key
             const freshProject = await prisma.corporateProject.findUnique({
               where: { id: projectId }
             });
@@ -2892,7 +2917,7 @@ app.post("/spoke/project/:projectId/accept", async (req, res) => {
               const alloc = freshProject.allocations?.find(a => a.targetCampusId === boardId);
               if (alloc) {
                   alloc.assignedKey = realKey;
-                  if (newBoardId) alloc.customBoardId = newBoardId; // save board ID
+                  alloc.customBoardId = realKey; // use project key as custom board ID to trigger JQL fetch
               }
               await prisma.corporateProject.update({
                 where: { id: freshProject.id },
@@ -2902,7 +2927,7 @@ app.post("/spoke/project/:projectId/accept", async (req, res) => {
                 }
               });
               invalidateCache(boardId);
-              if (newBoardId) invalidateCache(newBoardId);
+              invalidateCache(newBoardId);
               invalidateCache();
               console.log(`[ASYNC PROVISIONING SUCCESS] Finished creating Jira tasks for Project ${realKey}`);
             }
