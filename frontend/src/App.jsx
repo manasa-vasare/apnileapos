@@ -12195,6 +12195,7 @@ function ModeratorDashboardView({
 
   const [auditLoading, setAuditLoading] = useState(false);
   const [auditResults, setAuditResults] = useState(null);
+  const [selectedProjectForModal, setSelectedProjectForModal] = useState(null);
 
   // Spokes Management State
   const [showAddSpokeModal, setShowAddSpokeModal] = useState(false);
@@ -12275,8 +12276,51 @@ function ModeratorDashboardView({
   const pendingProjects = totalProjects - assignedProjects;
 
   return (
-    <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
+    <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: "30px", position: "relative" }}>
       
+      {selectedProjectForModal && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(8px)" }}>
+          <div style={{ background: "var(--bg-main)", border: "1px solid var(--border-glass)", borderRadius: "16px", width: "95vw", height: "95vh", maxWidth: "1600px", padding: "40px", position: "relative", boxShadow: "0 25px 50px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column" }}>
+            <button onClick={() => setSelectedProjectForModal(null)} style={{ position: "absolute", top: "24px", right: "24px", background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%", padding: "8px", color: "var(--text-main)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <X size={24} />
+            </button>
+            <h3 style={{ margin: "0 0 12px 0", color: "var(--text-main)", fontSize: "28px", fontWeight: "800", paddingRight: "40px" }}>{selectedProjectForModal.title}</h3>
+            <div style={{ fontSize: "14px", color: "var(--text-dim)", marginBottom: "24px", display: "flex", gap: "12px", borderBottom: "1px solid var(--border-glass)", paddingBottom: "24px" }}>
+              <span>Sponsor: <strong style={{ color: "var(--text-main)" }}>{selectedProjectForModal.company}</strong></span>
+              <span>&bull;</span>
+              <span>Duration: <strong style={{ color: "var(--text-main)" }}>{selectedProjectForModal.duration}</strong></span>
+            </div>
+            
+            <div style={{ flex: 1, overflowY: "auto", paddingRight: "16px" }}>
+              <div style={{ fontSize: "13px", color: "var(--text-muted)", lineHeight: "1.5", marginBottom: "20px" }}>
+                {selectedProjectForModal.description}
+              </div>
+              
+              {selectedProjectForModal.requirements && (
+                <div style={{ fontSize: "12.5px", color: "var(--text-muted)", marginBottom: "20px", background: "rgba(255,255,255,0.02)", padding: "12px", borderRadius: "8px", borderLeft: "2px solid var(--primary)" }}>
+                  <strong style={{ color: "var(--text-main)", display: "block", marginBottom: "4px" }}>Requirements:</strong>
+                  <em>{selectedProjectForModal.requirements}</em>
+                </div>
+              )}
+              
+              {selectedProjectForModal.phases && selectedProjectForModal.phases.length > 0 && (
+                <div>
+                  <strong style={{ fontSize: "12px", color: "var(--text-dim)", textTransform: "uppercase" }}>Project Phases:</strong>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "10px" }}>
+                    {selectedProjectForModal.phases.map((ph, idx) => (
+                      <div key={idx} style={{ fontSize: "12px", color: "var(--text-muted)", background: "rgba(255,255,255,0.015)", padding: "10px", borderRadius: "6px", border: "1px solid var(--border-glass)" }}>
+                        <strong style={{ color: "var(--primary)" }}>{ph.name}</strong>
+                        {ph.description && <div style={{ marginTop: "4px" }}>{ph.description}</div>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Portfolio Intake KPIs */}
       <div style={{
         display: "grid",
@@ -12420,24 +12464,24 @@ function ModeratorDashboardView({
                       <td style={{ padding: "16px" }}>
                         <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                           <span style={{ fontWeight: "700", color: "var(--primary)", fontSize: "14px" }}>{proj.title}</span>
-                          <p style={{ color: "var(--text-muted)", fontSize: "12px", lineHeight: "1.5", margin: 0, maxWidth: "450px" }}>{proj.description}</p>
-                          {proj.requirements && (
-                            <div style={{ marginTop: "6px", fontSize: "11.5px", color: "var(--text-muted)" }}>
-                              <strong>Requirements:</strong> <em>{proj.requirements}</em>
-                            </div>
-                          )}
-                          {proj.phases && proj.phases.length > 0 && (
-                            <div style={{ marginTop: "6px" }}>
-                              <span style={{ fontSize: "10.5px", fontWeight: "750", color: "var(--text-dim)", display: "block", textTransform: "uppercase" }}>Phases:</span>
-                              <div style={{ display: "flex", flexDirection: "column", gap: "2px", marginTop: "2px" }}>
-                                {proj.phases.map((ph, idx) => (
-                                  <div key={idx} style={{ fontSize: "11px", color: "var(--text-muted)" }}>
-                                    <strong>{ph.name}</strong> {ph.description && `- ${ph.description}`}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+                          <button
+                            onClick={() => setSelectedProjectForModal(proj)}
+                            style={{
+                              marginTop: "10px",
+                              fontSize: "12px",
+                              fontWeight: "700",
+                              color: "var(--primary)",
+                              cursor: "pointer",
+                              border: "none",
+                              background: "rgba(37, 99, 235, 0.1)",
+                              borderRadius: "4px",
+                              padding: "6px 12px",
+                              display: "inline-block",
+                              alignSelf: "flex-start"
+                            }}
+                          >
+                            View Details
+                          </button>
                         </div>
                       </td>
 
@@ -13470,19 +13514,19 @@ function CorporateSponsorDashboardView({ projects, loading, onRefresh, onSubmitP
     <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: "30px", position: "relative" }}>
       
       {selectedProjectForModal && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }}>
-          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-glass)", borderRadius: "12px", width: "550px", maxWidth: "90%", padding: "24px", position: "relative", boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}>
-            <button onClick={() => setSelectedProjectForModal(null)} style={{ position: "absolute", top: "16px", right: "16px", background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer" }}>
-              <X size={20} />
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(8px)" }}>
+          <div style={{ background: "var(--bg-main)", border: "1px solid var(--border-glass)", borderRadius: "16px", width: "95vw", height: "95vh", maxWidth: "1600px", padding: "40px", position: "relative", boxShadow: "0 25px 50px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column" }}>
+            <button onClick={() => setSelectedProjectForModal(null)} style={{ position: "absolute", top: "24px", right: "24px", background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%", padding: "8px", color: "var(--text-main)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <X size={24} />
             </button>
-            <h3 style={{ margin: "0 0 8px 0", color: "var(--text-main)", fontSize: "18px", fontWeight: "800", paddingRight: "20px" }}>{selectedProjectForModal.title}</h3>
-            <div style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "16px", display: "flex", gap: "8px" }}>
-              <span>Sponsor: <strong>{selectedProjectForModal.company}</strong></span>
+            <h3 style={{ margin: "0 0 12px 0", color: "var(--text-main)", fontSize: "28px", fontWeight: "800", paddingRight: "40px" }}>{selectedProjectForModal.title}</h3>
+            <div style={{ fontSize: "14px", color: "var(--text-dim)", marginBottom: "24px", display: "flex", gap: "12px", borderBottom: "1px solid var(--border-glass)", paddingBottom: "24px" }}>
+              <span>Sponsor: <strong style={{ color: "var(--text-main)" }}>{selectedProjectForModal.company}</strong></span>
               <span>&bull;</span>
-              <span>Duration: <strong>{selectedProjectForModal.duration}</strong></span>
+              <span>Duration: <strong style={{ color: "var(--text-main)" }}>{selectedProjectForModal.duration}</strong></span>
             </div>
             
-            <div style={{ maxHeight: "60vh", overflowY: "auto", paddingRight: "8px" }}>
+            <div style={{ flex: 1, overflowY: "auto", paddingRight: "16px" }}>
               <div style={{ fontSize: "13px", color: "var(--text-muted)", lineHeight: "1.5", marginBottom: "20px" }}>
                 {selectedProjectForModal.description}
               </div>
