@@ -624,7 +624,8 @@ app.get("/tasks", async (req, res) => {
         // Fetch via JQL for dynamic custom project boards (where targetJiraBoardId is the Project Key)
         const response = await axios.post(`${process.env.JIRA_DOMAIN}/rest/api/3/search/jql`, {
             jql: `project = ${targetJiraBoardId} ORDER BY created ASC`,
-            maxResults: 100
+            maxResults: 100,
+            fields: ["*all"]
         }, {
             headers: { Authorization: `Basic ${auth}`, Accept: "application/json", "Content-Type": "application/json" },
             timeout: 30000
@@ -639,6 +640,10 @@ app.get("/tasks", async (req, res) => {
             }
             return issue;
         });
+        
+        if (issues.length === 0) {
+           return res.json([{ id: "DIAG", key: "DIAG-1", fields: { summary: `DIAG: JQL returned 0 issues for ${targetJiraBoardId}`, status: { name: "To Do" }, parent: { key: targetJiraBoardId, fields: { summary: "Project Root" } } } }]);
+        }
       } else {
         const response = await axios.get(`${process.env.JIRA_DOMAIN}/rest/agile/1.0/board/${targetJiraBoardId}/issue`, {
           headers: {
