@@ -5777,7 +5777,7 @@ function App() {
                   />
                 )}
 
-                {currentPersona === "moderator" && (
+                {(currentPersona === "moderator" || currentPersona === "executive") && (
                   <>
                     <SidebarNavItem
                       active={activeWorkspace === "moderator" && moderatorActiveTab !== "spokes"}
