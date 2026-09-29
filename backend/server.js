@@ -2875,11 +2875,6 @@ app.post("/spoke/project/:projectId/accept", async (req, res) => {
             const realKey = projRes.data.key;
             console.log(`[ASYNC PROVISIONING] Jira Project Created successfully: ${realKey}`);
             
-            // 3. Find the auto-generated Agile board for this project
-            let newBoardId = null;
-            // wait a few seconds for Jira to generate the board
-            await new Promise(r => setTimeout(r, 2000));
-            
             // 3. Skip Agile Board lookup to avoid Jira index delays - use Project Key directly!
             let newBoardId = realKey; 
             
